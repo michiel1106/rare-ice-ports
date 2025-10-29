@@ -5,8 +5,7 @@ import me.shedaniel.rareice.RareIce;
 import me.shedaniel.rareice.blocks.entities.RareIceBlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.*;
 import net.minecraft.core.component.*;
 import net.minecraft.core.registries.*;
 import net.minecraft.server.level.ServerLevel;
@@ -14,8 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -75,10 +73,9 @@ public class RareIceBlock extends BaseEntityBlock {
     @Override
     public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack stack) {
         super.playerDestroy(world, player, pos, state, blockEntity, stack);
-        var enchantments = stack.get(DataComponents.ENCHANTMENTS);
-        int silkTouchLevel = 0;
-        if (enchantments != null)
-            silkTouchLevel = enchantments.getLevel(world.holderLookup(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH));
+        Holder<Enchantment> silkTouchHolder = world.holderLookup(Registries.ENCHANTMENT)
+                .getOrThrow(Enchantments.SILK_TOUCH);
+        int silkTouchLevel = EnchantmentHelper.getItemEnchantmentLevel(silkTouchHolder, stack);
         if (silkTouchLevel == 0) {
             if (world.dimensionType().ultraWarm()) {
                 world.removeBlock(pos, false);
