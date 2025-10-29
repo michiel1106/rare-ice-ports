@@ -3,8 +3,7 @@ package me.shedaniel.rareice.blocks.entities;
 import dev.architectury.event.*;
 import me.shedaniel.rareice.ItemLocation;
 import me.shedaniel.rareice.RareIce;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -53,7 +52,7 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
         this.itemsContained.clear();
         this.itemsLocations.clear();
     }
-    
+
     public NonNullList<ItemStack> getItemsContained() {
         return itemsContained;
     }
@@ -67,22 +66,22 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
-    
+
     @Override
-    public CompoundTag getUpdateTag() {
-        return this.saveWithoutMetadata();
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return this.saveWithoutMetadata(provider);
     }
-    
+
     @Override
-    public void load(CompoundTag tag) {
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         this.delay = tag.getInt("RevertDelay");
-        
+
         this.itemsContained.clear();
         this.itemsLocations.clear();
         ListTag itemsTag = tag.getList("Items", 10);
         for (int i = 0; i < itemsTag.size(); ++i) {
             CompoundTag compoundTag = itemsTag.getCompound(i);
-            itemsContained.add(ItemStack.of(compoundTag));
+            itemsContained.add(ItemStack.parseOptional(provider, compoundTag));
         }
         ListTag itemLocationsTag = tag.getList("ItemLocations", 10);
         for (int i = 0; i < itemLocationsTag.size(); ++i) {
@@ -90,32 +89,36 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
             itemsLocations.add(ItemLocation.fromTag(compoundTag));
         }
     }
-    
+
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
         tag.putInt("RevertDelay", delay);
-        
+
         ListTag itemsTag = new ListTag();
         ListTag itemLocationsTag = new ListTag();
-        for (int i = 0; i < itemsLocations.size(); ++i) {
+
+        for (int i = 0; i < itemsLocations.size(); i++) {
             ItemLocation itemLocation = itemsLocations.get(i);
             ItemStack stack = itemsContained.get(i);
+
             if (!stack.isEmpty()) {
-                CompoundTag compoundTag = new CompoundTag();
-                stack.save(compoundTag);
-                itemsTag.add(compoundTag);
+                CompoundTag stackTag = new CompoundTag();
+                stack.save(provider, stackTag);
+                itemsTag.add(stackTag);
             }
+
             if (!stack.isEmpty()) {
-                CompoundTag compoundTag = new CompoundTag();
-                itemLocation.toTag(compoundTag);
-                itemLocationsTag.add(compoundTag);
+                CompoundTag locTag = new CompoundTag();
+                itemLocation.toTag(locTag);
+                itemLocationsTag.add(locTag);
             }
         }
+
         tag.put("Items", itemsTag);
         tag.put("ItemLocations", itemLocationsTag);
     }
-    
+
     public void addLootTable(Level world) {
         setup = true;
     }
@@ -127,9 +130,9 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
             ServerLevel server = (ServerLevel) world;
             LootTable lootTable = server.getServer().reloadableRegistries()
                     .getLootTable(ResourceKey.create(Registries.LOOT_TABLE, LOOT_TABLE));
-            LootParams.Builder builder = new LootParams.Builder(server)
-                    .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN,
-                            net.minecraft.world.phys.Vec3.atCenterOf(pos));
+            LootParams.Builder builder = new LootParams.Builder(server);
+                    //.withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN,net.minecraft.world.phys.Vec3.atCenterOf(pos));
+
             List<ItemStack> drops = lootTable.getRandomItems(builder.create(LootContextParamSets.EMPTY));
             int size = Mth.clamp(world.random.nextInt(5) - (world.random.nextInt(1) + 2), 0, drops.size());
             if (drops.size() >= 1) {
@@ -153,7 +156,7 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
     public EventResult addItem(Level world, ItemStack itemStack, Player nullablePlayer) {
         return addItem(world, itemStack, nullablePlayer, true);
     }
-    
+
     public EventResult addItem(Level world, ItemStack itemStack, Player nullablePlayer, boolean actuallyDoIt) {
         if (itemStack.getItem() instanceof BlockItem) {
             if (((BlockItem) itemStack.getItem()).getBlock().builtInRegistryHolder().is(BlockTags.ICE))

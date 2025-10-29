@@ -7,6 +7,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.*;
+import net.minecraft.core.registries.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
@@ -69,11 +71,15 @@ public class RareIceBlock extends BaseEntityBlock {
     public boolean skipRendering(BlockState state, BlockState neighbor, Direction facing) {
         return neighbor.getBlock() == this || neighbor.getBlock() == Blocks.ICE || super.skipRendering(state, neighbor, facing);
     }
-    
+
     @Override
     public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack stack) {
         super.playerDestroy(world, player, pos, state, blockEntity, stack);
-        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, stack) == 0) {
+        var enchantments = stack.get(DataComponents.ENCHANTMENTS);
+        int silkTouchLevel = 0;
+        if (enchantments != null)
+            silkTouchLevel = enchantments.getLevel(world.holderLookup(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH));
+        if (silkTouchLevel == 0) {
             if (world.dimensionType().ultraWarm()) {
                 world.removeBlock(pos, false);
             } else {
