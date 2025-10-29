@@ -1,8 +1,8 @@
 {
-  "feature": "rare-ice:rare_ice",
+  "feature": "rare_ice:rare_ice",
   "placement": [
     {
-      "type": "rare-ice:rare_ice_count"
+      "type": "rare_ice:rare_ice_count"
     },
     {
       "type": "minecraft:height_range",

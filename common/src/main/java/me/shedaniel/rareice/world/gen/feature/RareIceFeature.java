@@ -113,7 +113,7 @@ public class RareIceFeature extends Feature<RareIceConfig> {
                                             bitSet.set(am);
                                             mutable.set(ag, ai, ak);
                                             if (config.predicate.test(world.getBlockState(mutable))) {
-                                                world.setBlock(mutable, RareIce.RARE_ICE_BLOCK.defaultBlockState(), 2);
+                                                world.setBlock(mutable, RareIce.RARE_ICE_BLOCK.get().defaultBlockState(), 2);
                                                 BlockEntity entity = world.getBlockEntity(mutable);
                                                 if (entity instanceof RareIceBlockEntity) {
                                                     ((RareIceBlockEntity) entity).addLootTable(world.getLevel());

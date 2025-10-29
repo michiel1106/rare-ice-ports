@@ -5,6 +5,7 @@ import dev.architectury.event.*;
 import dev.architectury.event.events.common.*;
 import dev.architectury.platform.*;
 import dev.architectury.registry.level.biome.*;
+import dev.architectury.registry.registries.*;
 import me.shedaniel.rareice.blocks.RareIceBlock;
 import me.shedaniel.rareice.blocks.entities.RareIceBlockEntity;
 import me.shedaniel.rareice.world.gen.feature.RareIceConfig;
@@ -37,13 +38,29 @@ import java.util.Properties;
 public class RareIce {
 
     public static final String MOD_ID = "rare_ice";
-    
-    public static final Block RARE_ICE_BLOCK = new RareIceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.ICE).isValidSpawn((state, world, pos, type) -> type == EntityType.POLAR_BEAR));
-    public static final BlockEntityType<RareIceBlockEntity> RARE_ICE_BLOCK_ENTITY_TYPE = BlockEntityType.Builder.of(RareIceBlockEntity::new, RARE_ICE_BLOCK).build(null);
-    public static final Feature<RareIceConfig> RARE_ICE_FEATURE = new RareIceFeature(RareIceConfig.CODEC);
 
-    public static final PlacementModifierType<RareIceCountPlacement> COUNT_PLACEMENT =
-            () -> RareIceCountPlacement.CODEC;
+
+
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(MOD_ID, Registries.BLOCK);
+    public static final RegistrySupplier<Block> RARE_ICE_BLOCK = BLOCKS.register("rare_ice",
+            () -> new RareIceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.ICE)
+                    .isValidSpawn((state, world, pos, type) -> type == EntityType.POLAR_BEAR))
+    );
+
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(MOD_ID, Registries.BLOCK_ENTITY_TYPE);
+    public static final RegistrySupplier<BlockEntityType<RareIceBlockEntity>> RARE_ICE_BLOCK_ENTITY_TYPE = BLOCK_ENTITIES.register("rare_ice",
+            () -> BlockEntityType.Builder.of(RareIceBlockEntity::new, RARE_ICE_BLOCK.get()).build(null)
+    );
+
+    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(MOD_ID, Registries.FEATURE);
+    public static final RegistrySupplier<Feature<RareIceConfig>> RARE_ICE_FEATURE = FEATURES.register("rare_ice",
+            () -> new RareIceFeature(RareIceConfig.CODEC)
+    );
+
+    public static final DeferredRegister<PlacementModifierType<?>> PLACEMENTS = DeferredRegister.create(MOD_ID, Registries.PLACEMENT_MODIFIER_TYPE);
+    public static final RegistrySupplier<PlacementModifierType<RareIceCountPlacement>> COUNT_PLACEMENT = PLACEMENTS.register("rare_ice_count",
+            () -> () -> RareIceCountPlacement.CODEC
+    );
     
     public static boolean allowInsertingItemsToIce = true;
     public static int probabilityOfRareIce = 3;
@@ -77,13 +94,15 @@ public class RareIce {
             e.printStackTrace();
         }
     }
+
     
     public static void onInitialize() {
         loadConfig(Platform.getConfigFolder().resolve(MOD_ID+".properties"));
-        Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice_count"), COUNT_PLACEMENT);
-        Registry.register(BuiltInRegistries.FEATURE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"), RARE_ICE_FEATURE);
-        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"), RARE_ICE_BLOCK_ENTITY_TYPE);
-        Registry.register(BuiltInRegistries.BLOCK, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"), RARE_ICE_BLOCK);
+
+        BLOCKS.register();
+        BLOCK_ENTITIES.register();
+        FEATURES.register();
+        PLACEMENTS.register();
         InteractionEvent.RIGHT_CLICK_BLOCK.register((player, interactionHand, pos, direction) -> {
             if (!allowInsertingItemsToIce) return EventResult.pass();
 
@@ -95,7 +114,7 @@ public class RareIce {
             if ((state.getBlock() == Blocks.ICE || state.getBlock() == RareIce.RARE_ICE_BLOCK)) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
                 if (blockEntity == null) {
-                    world.setBlockAndUpdate(pos, RareIce.RARE_ICE_BLOCK.defaultBlockState());
+                    world.setBlockAndUpdate(pos, RareIce.RARE_ICE_BLOCK.get().defaultBlockState());
                     blockEntity = world.getBlockEntity(pos);
                 }
                 if (blockEntity instanceof RareIceBlockEntity) {

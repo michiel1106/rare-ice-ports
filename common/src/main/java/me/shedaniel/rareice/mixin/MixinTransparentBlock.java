@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinTransparentBlock {
     @Inject(method = "skipRendering", cancellable = true, at = @At("RETURN"))
     private void skipRendering(BlockState state, BlockState neighbor, Direction facing, CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValueZ() && (Object) this instanceof IceBlock && neighbor.getBlock() == RareIce.RARE_ICE_BLOCK)
+        if (!cir.getReturnValueZ() && (Object) this instanceof IceBlock && neighbor.getBlock() == RareIce.RARE_ICE_BLOCK.get())
             cir.setReturnValue(true);
     }
 }

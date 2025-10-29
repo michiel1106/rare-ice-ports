@@ -18,6 +18,6 @@ public class RareIceCountPlacement extends RepeatingPlacement {
 
     @Override
     public PlacementModifierType<?> type() {
-        return RareIce.COUNT_PLACEMENT;
+        return RareIce.COUNT_PLACEMENT.get();
     }
 }

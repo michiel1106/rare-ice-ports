@@ -42,7 +42,7 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
     private int delay = 0;
     
     public RareIceBlockEntity(BlockPos pos, BlockState state) {
-        super(RareIce.RARE_ICE_BLOCK_ENTITY_TYPE, pos, state);
+        super(RareIce.RARE_ICE_BLOCK_ENTITY_TYPE.get(), pos, state);
         this.itemsContained = NonNullList.create();
         this.itemsLocations = new ArrayList<>();
     }

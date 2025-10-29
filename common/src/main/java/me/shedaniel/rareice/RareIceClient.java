@@ -12,7 +12,9 @@ import net.minecraft.client.renderer.RenderType;
 public class RareIceClient {
 
     public static void onInitializeClient() {
-        RenderTypeRegistry.register(RenderType.translucent(), RareIce.RARE_ICE_BLOCK);
-        BlockEntityRendererRegistry.register(RareIce.RARE_ICE_BLOCK_ENTITY_TYPE, RareIceBlockEntityRenderer::new);
+
+
+        RenderTypeRegistry.register(RenderType.translucent(), RareIce.RARE_ICE_BLOCK.get());
+        BlockEntityRendererRegistry.register(RareIce.RARE_ICE_BLOCK_ENTITY_TYPE.get(), RareIceBlockEntityRenderer::new);
     }
 }

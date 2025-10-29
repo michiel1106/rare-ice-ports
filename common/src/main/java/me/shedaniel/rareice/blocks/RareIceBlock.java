@@ -46,7 +46,7 @@ public class RareIceBlock extends BaseEntityBlock {
         if (world.isClientSide) {
             return null;
         } else {
-            return createTickerHelper(type, RareIce.RARE_ICE_BLOCK_ENTITY_TYPE, RareIceBlockEntity::tick);
+            return createTickerHelper(type, RareIce.RARE_ICE_BLOCK_ENTITY_TYPE.get(), RareIceBlockEntity::tick);
         }
     }
     
