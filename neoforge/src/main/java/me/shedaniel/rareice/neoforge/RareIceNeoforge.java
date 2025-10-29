@@ -7,8 +7,8 @@ import net.neoforged.fml.loading.*;
 
 
 @Mod(RareIce.MOD_ID)
-public final class ExampleModNeoForge {
-    public ExampleModNeoForge() {
+public final class RareIceNeoforge {
+    public RareIceNeoforge() {
         RareIce.onInitialize();
 
         if (FMLEnvironment.dist == Dist.CLIENT) {

@@ -16,14 +16,14 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.shedaniel.rareice.fabric.ExampleModFabric"
+      "me.shedaniel.rareice.fabric.RareIceFabric"
     ],
     "client": [
-      "me.shedaniel.rareice.fabric.client.ExampleModFabricClient"
+      "me.shedaniel.rareice.fabric.client.RareIceFabricClient"
     ]
   },
   "mixins": [
-    "rare-ice.mixins.json"
+    "rare_ice.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.15.3",

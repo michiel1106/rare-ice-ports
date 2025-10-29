@@ -3,6 +3,7 @@ package me.shedaniel.rareice;
 import com.mojang.serialization.*;
 import dev.architectury.event.*;
 import dev.architectury.event.events.common.*;
+import dev.architectury.platform.*;
 import dev.architectury.registry.level.biome.*;
 import me.shedaniel.rareice.blocks.RareIceBlock;
 import me.shedaniel.rareice.blocks.entities.RareIceBlockEntity;
@@ -10,9 +11,6 @@ import me.shedaniel.rareice.world.gen.feature.RareIceConfig;
 import me.shedaniel.rareice.world.gen.feature.RareIceCountPlacement;
 import me.shedaniel.rareice.world.gen.feature.RareIceFeature;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -38,7 +36,7 @@ import java.util.Properties;
 
 public class RareIce {
 
-    public static final String MOD_ID = "rare-ice";
+    public static final String MOD_ID = "rare_ice";
     
     public static final Block RARE_ICE_BLOCK = new RareIceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.ICE).isValidSpawn((state, world, pos, type) -> type == EntityType.POLAR_BEAR));
     public static final BlockEntityType<RareIceBlockEntity> RARE_ICE_BLOCK_ENTITY_TYPE = BlockEntityType.Builder.of(RareIceBlockEntity::new, RARE_ICE_BLOCK).build(null);
@@ -80,13 +78,12 @@ public class RareIce {
         }
     }
     
-    
     public static void onInitialize() {
-        loadConfig(FabricLoader.getInstance().getConfigDir().resolve("rare-ice.properties"));
-        Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, ResourceLocation.fromNamespaceAndPath("rare-ice", "rare_ice_count"), COUNT_PLACEMENT);
-        Registry.register(BuiltInRegistries.FEATURE, ResourceLocation.fromNamespaceAndPath("rare-ice", "rare_ice"), RARE_ICE_FEATURE);
-        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("rare-ice", "rare_ice"), RARE_ICE_BLOCK_ENTITY_TYPE);
-        Registry.register(BuiltInRegistries.BLOCK, ResourceLocation.fromNamespaceAndPath("rare-ice", "rare_ice"), RARE_ICE_BLOCK);
+        loadConfig(Platform.getConfigFolder().resolve(MOD_ID+".properties"));
+        Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice_count"), COUNT_PLACEMENT);
+        Registry.register(BuiltInRegistries.FEATURE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"), RARE_ICE_FEATURE);
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"), RARE_ICE_BLOCK_ENTITY_TYPE);
+        Registry.register(BuiltInRegistries.BLOCK, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"), RARE_ICE_BLOCK);
         InteractionEvent.RIGHT_CLICK_BLOCK.register((player, interactionHand, pos, direction) -> {
             if (!allowInsertingItemsToIce) return EventResult.pass();
 
@@ -116,7 +113,7 @@ public class RareIce {
                 mutable.getGenerationProperties()
                         .addFeature(
                                 GenerationStep.Decoration.UNDERGROUND_ORES,
-                                ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.fromNamespaceAndPath("rare-ice", "rare_ice"))
+                                ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"))
                         );
             }
         });

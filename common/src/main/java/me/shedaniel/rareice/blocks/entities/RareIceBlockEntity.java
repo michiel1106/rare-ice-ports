@@ -3,6 +3,7 @@ package me.shedaniel.rareice.blocks.entities;
 import dev.architectury.event.*;
 import me.shedaniel.rareice.ItemLocation;
 import me.shedaniel.rareice.RareIce;
+import static me.shedaniel.rareice.RareIce.MOD_ID;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.*;
 import net.minecraft.nbt.CompoundTag;
@@ -34,7 +35,7 @@ import java.util.List;
 
 public class RareIceBlockEntity extends BlockEntity implements Clearable {
     private static final RandomSource RANDOM = RandomSource.create();
-    private static final ResourceLocation LOOT_TABLE = ResourceLocation.parse("rare-ice:chests/rare_ice");
+    private static final ResourceLocation LOOT_TABLE = ResourceLocation.parse(MOD_ID+":chests/rare_ice");
     private final NonNullList<ItemStack> itemsContained;
     private final List<ItemLocation> itemsLocations;
     private boolean setup = false;
