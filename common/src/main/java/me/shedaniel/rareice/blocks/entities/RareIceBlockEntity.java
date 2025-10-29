@@ -17,7 +17,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Clearable;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -78,45 +77,46 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
 
         this.itemsContained.clear();
         this.itemsLocations.clear();
+
         ListTag itemsTag = tag.getList("Items", 10);
-        for (int i = 0; i < itemsTag.size(); ++i) {
-            CompoundTag compoundTag = itemsTag.getCompound(i);
-            itemsContained.add(ItemStack.parseOptional(provider, compoundTag));
+        for (int i = 0; i < itemsTag.size(); i++) {
+            CompoundTag stackTag = itemsTag.getCompound(i);
+            ItemStack stack = ItemStack.parse(provider, stackTag).orElse(ItemStack.EMPTY);
+            itemsContained.add(stack);
         }
-        ListTag itemLocationsTag = tag.getList("ItemLocations", 10);
-        for (int i = 0; i < itemLocationsTag.size(); ++i) {
-            CompoundTag compoundTag = itemLocationsTag.getCompound(i);
-            itemsLocations.add(ItemLocation.fromTag(compoundTag));
+
+        ListTag locationsTag = tag.getList("ItemLocations", 10);
+        for (int i = 0; i < locationsTag.size(); i++) {
+            CompoundTag locTag = locationsTag.getCompound(i);
+            itemsLocations.add(ItemLocation.fromTag(locTag));
         }
     }
+
+
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
         tag.putInt("RevertDelay", delay);
-
         ListTag itemsTag = new ListTag();
-        ListTag itemLocationsTag = new ListTag();
+        ListTag locationsTag = new ListTag();
 
-        for (int i = 0; i < itemsLocations.size(); i++) {
-            ItemLocation itemLocation = itemsLocations.get(i);
+        for (int i = 0; i < itemsContained.size(); i++) {
             ItemStack stack = itemsContained.get(i);
+            ItemLocation location = itemsLocations.get(i);
 
             if (!stack.isEmpty()) {
-                CompoundTag stackTag = new CompoundTag();
-                stack.save(provider, stackTag);
-                itemsTag.add(stackTag);
+                itemsTag.add(stack.save(provider));
             }
-
-            if (!stack.isEmpty()) {
+            if (location != null) {
                 CompoundTag locTag = new CompoundTag();
-                itemLocation.toTag(locTag);
-                itemLocationsTag.add(locTag);
+                location.toTag(locTag);
+                locationsTag.add(locTag);
             }
         }
 
         tag.put("Items", itemsTag);
-        tag.put("ItemLocations", itemLocationsTag);
+        tag.put("ItemLocations", locationsTag);
     }
 
     public void addLootTable(Level world) {
@@ -131,11 +131,10 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
             LootTable lootTable = server.getServer().reloadableRegistries()
                     .getLootTable(ResourceKey.create(Registries.LOOT_TABLE, LOOT_TABLE));
             LootParams.Builder builder = new LootParams.Builder(server);
-                    //.withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN,net.minecraft.world.phys.Vec3.atCenterOf(pos));
 
             List<ItemStack> drops = lootTable.getRandomItems(builder.create(LootContextParamSets.EMPTY));
             int size = Mth.clamp(world.random.nextInt(5) - (world.random.nextInt(1) + 2), 0, drops.size());
-            if (drops.size() >= 1) {
+            if (!drops.isEmpty()) {
                 for (int i = 0; i < size; i++) {
                     int index = world.random.nextInt(drops.size());
                     blockEntity.addItem(world, drops.get(index), null);
@@ -162,12 +161,14 @@ public class RareIceBlockEntity extends BlockEntity implements Clearable {
             if (((BlockItem) itemStack.getItem()).getBlock().builtInRegistryHolder().is(BlockTags.ICE))
                 return EventResult.pass();
         }
+
         if (getItemsContained().size() < 8 && itemStack.getCount() >= 1) {
             if (actuallyDoIt) {
-                getItemsContained().add(itemStack.split(1));
-                RandomSource random = world.random;
-                if (random == null) random = RANDOM;
-                getItemsLocations().add(new ItemLocation(random.nextDouble() * .95 + .1, random.nextDouble() * .7 + .1, random.nextDouble() * .95 + .1));
+                ItemStack added = itemStack.split(1);
+                getItemsContained().add(added);
+                RandomSource random = world.random != null ? world.random : RANDOM;
+                ItemLocation loc = new ItemLocation(random.nextDouble() * .95 + .1, random.nextDouble() * .7 + .1, random.nextDouble() * .95 + .1);
+                getItemsLocations().add(loc);
                 updateListeners();
             }
             if (nullablePlayer != null && world.isClientSide())
