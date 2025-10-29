@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "me.shedaniel.rareice.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [
+  ],
+  "mixins": [
+    "MixinTransparentBlock"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
