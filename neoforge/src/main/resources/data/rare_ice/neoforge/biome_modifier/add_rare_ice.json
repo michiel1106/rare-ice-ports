@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#c:is_cold/overworld",
+  "features": "rare_ice:rare_ice",
+  "step": "underground_ores"
+}

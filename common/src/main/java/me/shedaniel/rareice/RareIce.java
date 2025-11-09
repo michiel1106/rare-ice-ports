@@ -1,10 +1,8 @@
 package me.shedaniel.rareice;
 
-import com.mojang.serialization.*;
 import dev.architectury.event.*;
 import dev.architectury.event.events.common.*;
 import dev.architectury.platform.*;
-import dev.architectury.registry.level.biome.*;
 import dev.architectury.registry.registries.*;
 import me.shedaniel.rareice.blocks.RareIceBlock;
 import me.shedaniel.rareice.blocks.entities.RareIceBlockEntity;
@@ -12,12 +10,8 @@ import me.shedaniel.rareice.world.gen.feature.RareIceConfig;
 import me.shedaniel.rareice.world.gen.feature.RareIceCountPlacement;
 import me.shedaniel.rareice.world.gen.feature.RareIceFeature;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
+
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.*;
@@ -127,15 +121,8 @@ public class RareIce {
             return EventResult.pass();
         });
 
-        BiomeModifications.addProperties((biomeContext, mutable) -> {
-            if (biomeContext.getProperties().getClimateProperties().getTemperature() < 0.15F) {
-                mutable.getGenerationProperties()
-                        .addFeature(
-                                GenerationStep.Decoration.UNDERGROUND_ORES,
-                                ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "rare_ice"))
-                        );
-            }
-        });
+
+
 
     }
 }
