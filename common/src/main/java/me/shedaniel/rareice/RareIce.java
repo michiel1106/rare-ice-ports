@@ -11,6 +11,7 @@ import me.shedaniel.rareice.world.gen.feature.RareIceCountPlacement;
 import me.shedaniel.rareice.world.gen.feature.RareIceFeature;
 
 
+import net.fabricmc.loader.api.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Properties;
+import java.util.*;
 
 public class RareIce {
 
@@ -42,8 +43,9 @@ public class RareIce {
     );
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(MOD_ID, Registries.BLOCK_ENTITY_TYPE);
+
     public static final RegistrySupplier<BlockEntityType<RareIceBlockEntity>> RARE_ICE_BLOCK_ENTITY_TYPE = BLOCK_ENTITIES.register("rare_ice",
-            () -> BlockEntityType.Builder.of(RareIceBlockEntity::new, RARE_ICE_BLOCK.get()).build(null)
+            () -> new BlockEntityType<>(RareIceBlockEntity::new, Set.of(RARE_ICE_BLOCK.get()))
     );
 
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(MOD_ID, Registries.FEATURE);
@@ -62,6 +64,7 @@ public class RareIce {
     private static void loadConfig(Path file) {
         allowInsertingItemsToIce = true;
         probabilityOfRareIce = 3;
+
         
         if (Files.exists(file)) {
             try {
@@ -98,13 +101,13 @@ public class RareIce {
         FEATURES.register();
         PLACEMENTS.register();
         InteractionEvent.RIGHT_CLICK_BLOCK.register((player, interactionHand, pos, direction) -> {
-            if (!allowInsertingItemsToIce) return EventResult.pass();
+            if (!allowInsertingItemsToIce) return EventResult.pass().asMinecraft();
 
             Level world = player.level();
 
             BlockState state = world.getBlockState(pos);
             if (player == null || player.isShiftKeyDown())
-                return EventResult.pass();
+                return EventResult.pass().asMinecraft();
             if ((state.getBlock() == Blocks.ICE || state.getBlock() == RareIce.RARE_ICE_BLOCK)) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
                 if (blockEntity == null) {
@@ -115,10 +118,10 @@ public class RareIce {
                     RareIceBlockEntity rareIceBlockEntity = (RareIceBlockEntity) blockEntity;
                     ItemStack itemStack = player.getItemInHand(interactionHand);
                     itemStack = player.getAbilities().instabuild ? itemStack.copy() : itemStack;
-                    return rareIceBlockEntity.addItem(world, itemStack, player, !world.isClientSide());
+                    return rareIceBlockEntity.addItem(world, itemStack, player, !world.isClientSide()).asMinecraft();
                 }
             }
-            return EventResult.pass();
+            return EventResult.pass().asMinecraft();
         });
 
 
